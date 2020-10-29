@@ -368,7 +368,9 @@ def get_scene_episode_dict(episodes: List[Episode]) -> Dict:
     return scene_episode_dict
 
 
-def base_plus_ext(path: str) -> Union[Tuple[str, str], Tuple[None, None]]:
+def path_to_base_and_ext(
+    path: str,
+) -> Union[Tuple[str, str], Tuple[None, None]]:
     """Helper method that splits off all extension.
     Returns base, allext.
     path: path with extensions

@@ -13,10 +13,10 @@ from habitat import logger
 from habitat.core.simulator import ShortestPathPoint
 from habitat.datasets.utils import VocabDict
 from habitat_baselines.utils.common import (
-    base_plus_ext,
     create_tar_archive,
     delete_folder,
     get_scene_episode_dict,
+    path_to_base_and_ext,
     valid_sample,
 )
 
@@ -66,10 +66,12 @@ class EQADataset(wds.Dataset):
             self.calc_max_length()
             self.restructure_ans_vocab()
 
-            group_by_keys = filters.Curried(self.group_by_keys_)
+            # webdataset filter that is used to group episode scene images
+            # from webdataset and episode info from mp3d_eqa_v1 dataset
+            group_episode_info = filters.Curried(self.group_episode_info_)
             super().__init__(
                 urls=self.frame_dataset_path + ".tar",
-                initial_pipeline=[group_by_keys()],
+                initial_pipeline=[group_episode_info()],
             )
 
             self.only_vqa_task = config.ONLY_VQA_TASK
@@ -127,16 +129,16 @@ class EQADataset(wds.Dataset):
 
                 logger.info("[ Frame dataset is ready. ]")
 
-    def group_by_keys_(
+    def group_episode_info_(
         self,
         data,
-        keys: Callable[[str], Tuple[str]] = base_plus_ext,
+        keys: Callable[[str], Tuple[str]] = path_to_base_and_ext,
         lcase: bool = True,
         suffixes=None,
     ):
         """Returns function over iterator that groups key, value pairs into samples-
         a custom pipeline for grouping episode info & images in the webdataset.
-        keys: function that splits the key into key and extension (base_plus_ext)
+        keys: function that splits the key into key and extension (path_to_base_and_ext)
         lcase: convert suffixes to lower case (Default value = True)
         """
         current_sample = {}
